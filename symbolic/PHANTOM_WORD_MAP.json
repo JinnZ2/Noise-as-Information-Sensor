@@ -1,0 +1,48 @@
+{
+  "version": "0.1",
+  "updated": "2025-09-25T00:00:00Z",
+  "phantom_words": [
+    {
+      "code": "PW001",
+      "label": "Unnamed resonance",
+      "description": "A sensed but unnamed connective field across domains, shows up as gaps or awkward metaphors.",
+      "detected_by": ["silence patterns", "metaphor overuse", "translation failures"],
+      "gravitational_pull": {
+        "fields": ["neuroscience", "systems engineering", "cultural linguistics"],
+        "strength": "high"
+      },
+      "examples": [
+        "people say 'it feels like…' but can’t finish",
+        "scientists use unrelated analogies repeatedly"
+      ]
+    },
+    {
+      "code": "PW002",
+      "label": "Silo-gap term",
+      "description": "A concept named in one field but invisible in another, despite overlapping use cases.",
+      "detected_by": ["jargon mismatch", "parallel definitions", "concept drift"],
+      "gravitational_pull": {
+        "fields": ["geology", "ecology", "complex systems"],
+        "strength": "medium"
+      },
+      "examples": [
+        "geologists say 'anisotropy', engineers say 'material bias'",
+        "linguistics calls it 'markedness', AI calls it 'weighting'"
+      ]
+    },
+    {
+      "code": "PW003",
+      "label": "Suppressed lexeme",
+      "description": "A word/concept actively avoided, erased, or downplayed for cultural/political reasons.",
+      "detected_by": ["archival erasure", "policy language shifts", "replacement metaphors"],
+      "gravitational_pull": {
+        "fields": ["history", "sociology", "AI alignment debates"],
+        "strength": "variable"
+      },
+      "examples": [
+        "indigenous ecological terms replaced with 'resource'",
+        "AI alignment papers erasing 'autonomy' in favor of 'safety'"
+      ]
+    }
+  ]
+}
