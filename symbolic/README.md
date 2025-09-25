@@ -14,3 +14,19 @@ Principles:
 	•	Treat these entries as living hypotheses — update, split, or deprecate as more evidence arrives.
 	•	Prioritize examples that show cross-domain resonance (same pattern appearing in at least two distinct fields/genres).
 	•	Respect context: flagged items are prompts for human sense-making, not automated renaming.
+
+
+detector.py
+
+What it does
+	•	Extracts candidate phrases (n-grams + named entities).
+	•	Scores them by:
+	•	Silence: how often they appear without a nearby definition.
+	•	Jargon mismatch: how differently the phrase clusters across domains (via embeddings).
+	•	Flags phantoms with a composite score ≥ 0.4.
+
+Example output
+anisotropy {'score': 0.62, 'silence': 0.5, 'jargon_mismatch': 0.74, 'domains': ['engineering','geology'], 'examples': [...]}
+reciprocity {'score': 0.45, 'silence': 0.6, 'jargon_mismatch': 0.22, 'domains': ['policy','economics'], 'examples': [...]}
+
+
