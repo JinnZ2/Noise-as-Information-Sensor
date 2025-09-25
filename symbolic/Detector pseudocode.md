@@ -54,3 +54,9 @@ def detect_phantoms(corpus, min_score=0.4, min_domains=2):
 # - translation_gap: compute cross-domain mapping using bilingual embeddings or clustering; high gap when cluster distances show separate labels
 # - metaphor_overuse: collocation with known metaphor markers ("like", "as", "felt", senses)
 # - jargon_mismatch: compare phrase frequency to technical lexicons per domain
+
+
+Notes:
+	•	Start with lightweight heuristics; tune weights with your own corpora.
+	•	Use embeddings (sentence-transformers) for cross-domain clustering to detect synonyms used in separate fields.
+	•	Keep flagged candidates in a review queue: human-in-the-loop is central.
