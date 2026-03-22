@@ -20,14 +20,18 @@ class SymbolicIntelligenceEngine:
 
     def _detect_resonance(self, data):
         """Detects strong coherent signals within a noisy dataset"""
-        if isinstance(data, dict):
-            signal_strengths = list(data.values())
-        elif isinstance(data, list):
-            signal_strengths = data
-        else:
-            signal_strengths = [float(data)]
+        values = data.values() if isinstance(data, dict) else [data]
+        scalars = []
+        for v in values:
+            if isinstance(v, (int, float, bool, np.floating)):
+                scalars.append(float(v))
+            elif isinstance(v, (list, np.ndarray)):
+                scalars.append(float(np.mean(v)))
 
-        avg_strength = np.mean(signal_strengths)
+        if not scalars:
+            return "Subthreshold"
+
+        avg_strength = np.mean(scalars)
         if avg_strength >= self.resonance_threshold:
             return "Resonance Detected"
         else:
