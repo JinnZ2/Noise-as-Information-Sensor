@@ -8,7 +8,8 @@ class QuantumNoiseProcessor:
 
     def extract_fluctuations(self, molecular_data):
         """Extract random fluctuations from molecular data"""
-        return np.diff(molecular_data) + np.random.normal(0, 0.001, len(molecular_data) - 1)
+        rng = np.random.default_rng(seed=42)
+        return np.diff(molecular_data) + rng.normal(0, 0.001, len(molecular_data) - 1)
 
     def detect_quantum_correlations(self, fluctuations):
         """Detect non-classical correlations across fluctuations"""

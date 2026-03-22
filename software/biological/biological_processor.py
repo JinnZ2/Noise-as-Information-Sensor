@@ -18,8 +18,8 @@ class BiologicalNoiseProcessor:
         """Match background patterns to known bio signals"""
         matches = {}
         for key, sig in self.known_signatures.items():
-            sim = 1 - np.abs(np.corrcoef(sig, background_data[:len(sig)])[0, 1])
-            matches[key] = round(1 - sim, 3)
+            correlation = np.abs(np.corrcoef(sig, background_data[:len(sig)])[0, 1])
+            matches[key] = round(float(correlation), 3) if not np.isnan(correlation) else 0.0
         return matches
 
     def detect_collective_patterns(self, matches):
@@ -32,6 +32,7 @@ class BiologicalNoiseProcessor:
         return sum(matches.values()) / len(matches)
 
     def analyze_biological_noise(self, chemical_data):
+        """Main analysis pipeline for biological noise patterns"""
         background = self.extract_background_variations(chemical_data)
         bio_signals = self.pattern_match_bio_signatures(background)
         collective = self.detect_collective_patterns(bio_signals)

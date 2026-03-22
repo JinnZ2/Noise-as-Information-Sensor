@@ -18,7 +18,7 @@ Noise-as-Information-Sensor/
 │   ├── biological/biological_processor.py # Bio signals & inter-species coordination
 │   ├── electromagnetic/em_processor.py  # Solar, geomagnetic, cosmic ray effects
 │   ├── planetary/gaia_processor.py      # Atmospheric chaos & planetary feedback
-│   └── anduino/
+│   └── arduino/
 │       ├── noise_capture.ino            # Arduino firmware for sensor streaming
 │       └── notes.txt                    # Supported sensors documentation
 ├── dashboard/
@@ -75,7 +75,15 @@ resonance_threshold: 0.75
 python main.py
 ```
 
-No formal dependency management exists yet. Key dependencies:
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# For phantom_detector.py, also install the spaCy model:
+python -m spacy download en_core_web_sm
+```
+
+Key dependencies:
 
 | Package | Used In | Purpose |
 |---------|---------|---------|
@@ -100,7 +108,7 @@ No formal dependency management exists yet. Key dependencies:
 | `main.py` | Full pipeline: dashboard + symbolic engine |
 | `software/*/` processor modules | Can be imported and used individually |
 | `symbolic/phantom_detector.py` | Standalone NLP tool (requires corpus input) |
-| `software/anduino/noise_capture.ino` | Arduino firmware (upload via Arduino IDE) |
+| `software/arduino/noise_capture.ino` | Arduino firmware (upload via Arduino IDE) |
 
 ## Development Notes
 
@@ -116,8 +124,7 @@ No formal dependency management exists yet. Key dependencies:
 
 - No test suite (no pytest, unittest, or test files)
 - No CI/CD pipeline or GitHub Actions
-- No requirements.txt, pyproject.toml, or formal dependency management
-- No .gitignore file
+- No pyproject.toml or package distribution setup
 - No linting/formatting configuration
 - No build system or package distribution setup
 - No containerization (Docker)

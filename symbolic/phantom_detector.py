@@ -8,15 +8,26 @@ import spacy
 from collections import Counter, defaultdict
 from sentence_transformers import SentenceTransformer, util
 
-# Load English model for tokenization
-nlp = spacy.load("en_core_web_sm")
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
+_nlp = None
+_embedder = None
+
+def _get_nlp():
+    global _nlp
+    if _nlp is None:
+        _nlp = spacy.load("en_core_web_sm")
+    return _nlp
+
+def _get_embedder():
+    global _embedder
+    if _embedder is None:
+        _embedder = SentenceTransformer("all-MiniLM-L6-v2")
+    return _embedder
 
 # --- Core Functions ---
 
 def extract_phrases(text, n=(1,3)):
     """Return n-grams (1-3 tokens) + named entities from text."""
-    doc = nlp(text)
+    doc = _get_nlp()(text)
     phrases = []
     # n-grams
     tokens = [t.text for t in doc if not t.is_punct and not t.is_space]
@@ -48,7 +59,7 @@ def jargon_mismatch(phrase, domains):
     for d, texts in domains.items():
         joined = " ".join(texts)
         domain_sents.append(joined)
-    embs = embedder.encode(domain_sents, convert_to_tensor=True)
+    embs = _get_embedder().encode(domain_sents, convert_to_tensor=True)
     sim = util.pytorch_cos_sim(embs, embs)
     avg_sim = sim.mean().item()
     return 1 - avg_sim  # higher = more mismatch
