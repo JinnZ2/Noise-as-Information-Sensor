@@ -67,6 +67,7 @@
         "detected_by": ["dialogic imbalance", "policy language masking flows", "family/community narrative dissonance"],
         "gravitational_pull": {"fields": ["economics","sociology","policy"], "strength": "high"},
         "examples": ["'partnership' used for extractive contracts","community labor framed as 'tradition' while benefits flow outward"]
+    },
     }
   ]
 }
