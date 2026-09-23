@@ -170,7 +170,7 @@ environmental instrument. Its purpose is to explore and reframe what noise means
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+CC0-1.0 — see [LICENSE](LICENSE).
 
 ---
 
