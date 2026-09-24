@@ -269,11 +269,13 @@ WORKED INSTANCE the fixtures are shaped after, NOT RUN
   A tractor cab and its trailer on a serpentine descent: the sensor sits in
   the cab, the body at risk is the trailer, and a cab suspension mode reads
   as a trailer finding unless the two are separated.
-  Cross-link: ESP-1 packet, stability-trigger-envelope/
-  Status: NAMED_AND_ABSENT. No such folder exists in this repository and no
-  such packet is reachable from this session. The pointer is recorded as
-  absent rather than reconstructed -- writing a plausible envelope here would
-  put a specification in someone else's mouth.
+  Cross-link: JinnZ2/Simulators, stability-trigger-envelope/ (ESP-1)
+  Status: PENDING, not yet landed. Checked 2026-09-24 against that repository
+  as available to this session: 213 folders, no stability-trigger-envelope
+  among them (nearest by name are trigger-geometry/ and envelope-asymmetry/,
+  neither of which is it). The pointer names where the packet is expected to
+  land and is not reconstructed here -- writing a plausible envelope would put
+  a specification in someone else's mouth.
 """
 
 
@@ -525,9 +527,11 @@ def _selftest() -> int:
         ck(True, "an undeclared role is refused")
 
     # the cross-link is recorded as absent rather than reconstructed
-    ck("NAMED_AND_ABSENT" in FIXTURE_NOTE,
-       "the ESP-1 cross-link is marked named-and-absent")
-    ck("rather than reconstructed" in FIXTURE_NOTE,
+    ck("PENDING, not yet landed" in FIXTURE_NOTE,
+       "the ESP-1 cross-link is marked pending against its target repository")
+    ck("JinnZ2/Simulators" in FIXTURE_NOTE,
+       "the cross-link names the repository the packet is expected in")
+    ck("is not reconstructed here" in FIXTURE_NOTE,
        "the cross-link records that nothing was invented in its place")
     ck("CONSTRUCTED" in FIXTURE_NOTE, "the fixtures are marked constructed")
 

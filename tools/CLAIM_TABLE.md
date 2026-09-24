@@ -5,11 +5,16 @@ Claims about the four instruments in this directory. Ids are `NC_*` and are
 `C1..C12` in `docs/FALSIFICATION_LOG.md`. Nothing here restates, endorses or
 extends an older claim.
 
+Four of these ids -- NC_002, NC_006, NC_009, NC_013 -- are also rows in
+`experiments/check_claims.py`, so one claim carries one id in both files. The
+rest are not executable there and the table says which and why.
+
 Every claim below is a property of code in this directory, recomputable by
 anyone with the clone:
 
 ```
-python3 tools/test_tools.py
+python3 tools/test_tools.py          # the instruments' own selftests
+python3 experiments/check_claims.py  # the repository harness, NC rows included
 ```
 
 The check total is printed by that command and is deliberately not written
@@ -47,10 +52,10 @@ here. A count stored in a document is a second place for it to drift.
 | id | claim | status |
 |----|-------|--------|
 | NC_001 | **Nothing in `tools/` duplicates an existing module.** The repository before this drop held four domain processors, an aggregator, a symbolic engine, an NLP detector and a claim harness. None computes an interval, a channel comparison, a rerun rate, a residual partition or a two-body source attribution. The nearest neighbour is `symbolic_intelligence.py`, which averages whatever scalars a domain returns — the operation `C6` in the falsification log records as unit-free — and these four tools do not touch it, call it or endorse it. | SUPPORTED |
-| NC_017 | **The N4 cross-link is NAMED_AND_ABSENT.** `stability-trigger-envelope/` and the ESP-1 packet are not in this repository and are not reachable from this session. Recorded as absent rather than reconstructed: writing a plausible envelope would put a specification in someone else's mouth. | SUPPORTED |
+| NC_017 | **The N4 cross-link is a cross-repo pointer, PENDING.** `JinnZ2/Simulators, stability-trigger-envelope/ (ESP-1) -- PENDING, not yet landed`. Checked 2026-09-24 against that repository as available to this session: 213 folders, no `stability-trigger-envelope` among them; the nearest by name are `trigger-geometry/` and `envelope-asymmetry/`, neither of which is it. The pointer names where the packet is expected and reconstructs nothing. | SUPPORTED, target checked |
 | NC_018 | **Every published-value fixture is SECONDARY and its primary is UNREAD.** Probed 2026-09-24T11:25Z: `www.biorxiv.org`, `arxiv.org` and `www.nature.com` return no response through this environment's egress policy, with `github.com` answering as the control. No count in any fixture was transcribed from a paper. | UNVERIFIED |
-| NC_019 | **No claim was added to `experiments/check_claims.py`, and that is a departure from the repository's own contributing rule.** The repository asks every contributor to add their claim to that harness. The dispatch's STEP 0 forbids editing or extending the existing claims. The dispatch governs here and the claim table sits in `tools/` instead, with the conflict recorded rather than resolved silently. A later round may fold `NC_*` into the harness; that is a decision for whoever owns the record. | NOT BUILT, reason stated |
-| NC_020 | **The existing harness could not be run in this environment.** `experiments/check_claims.py` imports numpy and numpy is not installed here, so `main.py` and the four processors were read and not executed. This is a pre-existing environment condition, not a change: `git status` shows `tools/` as the only addition. Nothing in `tools/` imports numpy, so this directory runs where the rest of the pipeline currently does not. | SUPPORTED |
+| NC_019 | **The dispatch/contributing conflict was a misreading on my part, and is now closed.** First filing withheld the `NC_*` rows from `experiments/check_claims.py`, reading STEP 0's "do NOT edit, endorse or extend older claims" as covering the file rather than the claims in it. The operator clarified on 2026-09-24 that adding new rows is neither editing nor endorsing an older claim, and that the dispatch wording was **overbroad**. Four rows were then added under the repository's own contributing rule. The insertion is provably pure: `git diff` reports **162 insertions and 0 deletions**, and every `C1..C12` verdict is byte-identical before and after (`FALSIFIED=9 HOLDS=1 OPEN=1 REVISED=1` on the C rows both runs). The `NC_*` checks import from `tools/` only and touch no processor, so an NC row cannot move because a C row moved. | CLOSED by clarification |
+| NC_020 | **CORRECTED. The harness runs.** First filing recorded that `experiments/check_claims.py` could not be run because numpy was absent from this environment, and that the processors were read and not executed. That was true of the environment as first found and false of the environment available: `pip install numpy` succeeded (2.4.6) when the clarification made running the harness necessary. The correction is recorded here rather than replacing the original line, because a first filing that reported an absence it had not tried to remove is the more useful half. **Baseline captured before any NC row was added**, so the no-movement result rests on a measurement and not on an assumption. What survives unchanged: nothing in `tools/` imports numpy, and the four instruments still run where numpy is absent. | CORRECTED |
 | NC_021 | **Nothing here is a measurement of anything physical.** No sensor, no vehicle, no campaign, no survey. Three of the four tools run on CONSTRUCTED fixtures whose expected values are known in advance because they were authored; the fourth runs on percentages from a press report. Whether any of the four separates what it claims to separate on real data is untouched in both directions. | UNVERIFIED |
 
 ---
@@ -69,3 +74,6 @@ here. A count stored in a document is a second place for it to drift.
 - **NC_001** dies if a reader finds an existing module computing any of the four
   quantities. The overlap scan behind it is a read of every `.py` in the
   repository, listed in `tools/README.md`.
+- **NC_017** closes the moment the ESP-1 packet lands in `JinnZ2/Simulators`.
+  It is a statement about where a pointer points and what is currently at the
+  other end, not about the packet's content, which is unread in both states.

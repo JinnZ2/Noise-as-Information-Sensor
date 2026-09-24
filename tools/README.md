@@ -6,12 +6,17 @@ condition; the repository's own LICENSE is MIT and these files carry the more
 permissive of the two, stated here rather than assumed.
 
 They do not read, call, modify or endorse anything in `software/`,
-`dashboard/`, `symbolic/` or `experiments/`. Claims about them live in
-`tools/CLAIM_TABLE.md` under `NC_*` ids, kept apart from the repository's own
-`C1..C12` in `docs/FALSIFICATION_LOG.md`.
+`dashboard/` or `symbolic/`. Claims about them live in `tools/CLAIM_TABLE.md`
+under `NC_*` ids, kept apart from the repository's own `C1..C12` in
+`docs/FALSIFICATION_LOG.md`.
+
+Four of those ids -- NC_002, NC_006, NC_009, NC_013 -- are also rows in
+`experiments/check_claims.py`, added under the repository's contributing rule.
+They import from `tools/` only, so an NC row cannot move because a C row moved.
 
 ```
 python3 tools/test_tools.py          # every selftest, check total printed
+python3 experiments/check_claims.py  # the repository harness, NC rows included
 python3 tools/channel_loss.py        # N1 on its fixtures
 python3 tools/rerun_find_rate.py     # N2
 python3 tools/residual_partition.py  # N3
@@ -125,9 +130,10 @@ the spec:
 
 The worked instance — a tractor cab and its trailer on a serpentine descent,
 sensor in the cab, body at risk the trailer — is text. Its cross-link, the
-ESP-1 packet under `stability-trigger-envelope/`, is **NAMED_AND_ABSENT**: no
-such folder is in this repository and none is reachable from here, and nothing
-was reconstructed in its place.
+cross-link is `JinnZ2/Simulators, stability-trigger-envelope/ (ESP-1)`, marked
+**PENDING, not yet landed**: checked 2026-09-24 against that repository as
+available to this session, 213 folders and no `stability-trigger-envelope`
+among them. Nothing was reconstructed in its place.
 
 ---
 
@@ -155,12 +161,23 @@ attribution. The nearest neighbour is `symbolic_intelligence.py`, whose
 `C6` records as unit-free. These four tools do not call it, extend it or take a
 position on it.
 
-**Not run here:** `main.py`, the four processors and `experiments/check_claims.py`
-all import numpy, which is not installed in this environment, so they were read
-and not executed (`NC_020`). Nothing in `tools/` imports numpy.
+**Run:** the harness was first filed as unrunnable here for want of numpy;
+numpy was then installed and it runs (`NC_020`, corrected in place rather than
+replaced). A baseline was captured **before** any NC row was added, so the
+no-movement result below is a measurement.
 
-**Not built, with the reason:** no `NC_*` claim was added to
-`experiments/check_claims.py`. The repository's contributing rule asks for
-exactly that; the dispatch's STEP 0 forbids editing or extending the existing
-claims. The dispatch governs, the claim table sits here instead, and the
-conflict is recorded rather than resolved quietly (`NC_019`).
+**Added under the contributing rule:** four `NC_*` rows in
+`experiments/check_claims.py`, one per tool. The first filing withheld them on
+an overbroad reading of the dispatch's STEP 0; the operator clarified that
+adding new rows is not editing or endorsing an older claim (`NC_019`). The
+insertion is pure -- 162 insertions, 0 deletions -- and every `C1..C12`
+verdict is byte-identical before and after:
+
+```
+before   FALSIFIED=9  HOLDS=1  OPEN=1  REVISED=1
+after    FALSIFIED=9  HOLDS=5  OPEN=1  REVISED=1     <- the four added HOLDS
+C rows   identical, line for line
+```
+
+Nothing in `tools/` imports numpy; the four instruments still run where it is
+absent.

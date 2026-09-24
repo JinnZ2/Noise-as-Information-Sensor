@@ -401,6 +401,168 @@ CHECKS = [c1_documented_paths, c2_quantum_timescales, c3_synthetic_injection,
           c10_silence_signal, c11_jargon_mismatch, c12_detector_runs]
 
 
+# ==========================================================================
+# NC_*  tools/ -- the four instruments added under DISPATCH NOISE-1
+# ==========================================================================
+#
+# Added as new rows under the repository's own contributing rule: a claim that
+# has not been run is not a finding. Every C-row above is untouched.
+#
+# Ids are shared with tools/CLAIM_TABLE.md so one claim carries one id in both
+# files. The table holds NC_001..NC_021; the four below are the ones that are
+# executable here, and the table says which of the rest are not and why.
+#
+# These checks import from tools/ only. They do not read, call or depend on
+# any processor, the dashboard or the symbolic engine, so an NC row cannot
+# move because a C row moved.
+
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+
+
+def nc002_denominator_sets_the_verdict():
+    """tools/channel_loss.py: with the counts unread, the verdict is a
+    property of the assumed denominator rather than of the report."""
+    import channel_loss as cl
+
+    rows = cl.denominator_sweep(0.90, 0.32, [10, 25, 50, 100, 250])
+    lines = []
+    for row in rows:
+        r = row["result"]
+        lines.append(f"  n={row['n']:4d}  realized {row['realized_direct']:.2f}/"
+                     f"{row['realized_mediated']:.2f}  point loss "
+                     f"{r['loss_point']:.4f}  -> {r['kind']}")
+    kinds = {row["result"]["kind"] for row in rows}
+    small = [r for r in rows if r["n"] == 10][0]
+    big = [r for r in rows if r["n"] == 250][0]
+    ev = ("the same two published percentages (>= 90% direct, as low as 32%\n"
+          "mediated), read at five assumed denominators:\n" + "\n".join(lines) +
+          f"\nverdict at n=10:  {small['result']['kind']} "
+          f"(intervals overlap: {small['result']['intervals_overlap']})\n"
+          f"verdict at n=250: {big['result']['kind']} "
+          f"(intervals overlap: {big['result']['intervals_overlap']})\n"
+          "nothing about the report changed across those rows. The real counts\n"
+          "are UNREAD -- the publisher hosts are unreachable from this\n"
+          "environment -- so the denominator is assumed, and the verdict is a\n"
+          "property of that assumption.\n"
+          f"at the small end the POINT moves too: reconstruction error "
+          f"{small['reconstruction_error']:.4f} at n=10 against "
+          f"{big['reconstruction_error']:.4f} at n=250, because an integer\n"
+          "count over a small denominator cannot represent an arbitrary\n"
+          "percentage.")
+    record("NC_002", "HOLDS" if len(kinds) > 1 else "FALSIFIED",
+           "With the counts unread, the CHANNEL_LOSS verdict is set by the "
+           "assumed denominator.", ev)
+
+
+def nc006_assigned_path_is_the_sharper_bound():
+    """tools/rerun_find_rate.py: the headline 1-of-11 is not the tightest
+    number the same eleven runs support."""
+    import rerun_find_rate as rf
+    from typed import clopper_pearson, fmt_interval
+
+    res = rf.score(rf.fixture_runs())
+    headline = res["interval"]
+    assigned = clopper_pearson(res["assigned_path_finds"], res["runs"])
+    ev = (f"reported campaign: {res['runs']} runs, {res['finds']} find, "
+          f"{res['misses']} misses\n"
+          f"headline (any path):   {fmt_interval(headline)}\n"
+          f"assigned path only:    {fmt_interval(assigned)}\n"
+          f"verdict kind: {res['kind']}\n"
+          f"side-path share of finds: {res['side_path_share']}\n"
+          "the one find came off a SIDE path, so the route the campaign was\n"
+          "designed around found nothing in eleven runs. Its upper bound is\n"
+          f"{assigned['hi']:.4f} against the headline's {headline['hi']:.4f}.\n"
+          "this bounds the PROCESS, not the result: a rarely-reached real\n"
+          "result and a once-reached artifact produce the same 1/11.")
+    record("NC_006", "HOLDS" if assigned["hi"] < headline["hi"] else "FALSIFIED",
+           "The assigned-path bound is tighter than the headline bound on the "
+           "same eleven runs.", ev)
+
+
+def nc009_residual_is_never_fitted():
+    """tools/residual_partition.py: no candidate is scaled or subtracted."""
+    import residual_partition as rp
+
+    observed, declared, _ = rp.fixture_f1()
+    bare = rp.partition(observed, declared, [])
+    loaded = rp.partition(observed, declared, [
+        rp.candidate("a", "SIGN_POSITIVE", basis="CONSTRUCTED"),
+        rp.candidate("b", "SIGN_NEGATIVE", basis="CONSTRUCTED"),
+        rp.candidate("c", "MONOTONE_UP", basis="CONSTRUCTED")])
+    identical = bare["residual_series"] == loaded["residual_series"]
+
+    refused = []
+    for field in rp.FORBIDDEN_CANDIDATE_FIELDS:
+        try:
+            rp._reject_magnitude(**{field: 1.0})
+            refused.append(f"{field}=ACCEPTED")
+        except ValueError:
+            refused.append(f"{field}=refused")
+
+    ev = (f"residual with no candidates:    {bare['residual_series']}\n"
+          f"residual with three candidates: {loaded['residual_series']}\n"
+          f"identical: {identical}\n"
+          f"consistent candidates: {loaded['consistent']} of three offered, "
+          "ranked by nothing\n"
+          "magnitude fields at the constructor: " + ", ".join(refused) + "\n"
+          "a candidate carries a SIGN or a SHAPE and nothing else. A fitted\n"
+          "magnitude makes every candidate consistent, which is how an\n"
+          "unexplained remainder becomes a confirmed mechanism with no\n"
+          "measurement taken.")
+    ok = identical and all(r.endswith("refused") for r in refused)
+    record("NC_009", "HOLDS" if ok else "FALSIFIED",
+           "No candidate is scaled or subtracted; the residual does not move "
+           "with the candidate list.", ev)
+
+
+def nc013_lead_is_modulo_the_forcing_period():
+    """tools/two_body_source.py: a periodic correlation fixes the lead only
+    within a period, and the branch was deciding a verdict."""
+    import two_body_source as tb
+
+    n, p, rate = 240, 40.0, 100.0
+    ref = tb._sine(n, p, 1.0)
+    zero = tb.phase_lead(tb._sine(n, p, 1.0, phase_samples=0.0), ref, rate, p / rate)
+    onep = tb.phase_lead(tb._sine(n, p, 1.0, phase_samples=p), ref, rate, p / rate)
+    lag4 = tb.phase_lead(tb._sine(n, p, 1.0, phase_samples=4.0), ref, rate, p / rate)
+    half = tb.phase_lead(tb._sine(n, p, 1.0, phase_samples=p / 2.0), ref, rate, p / rate)
+
+    a, b, per = tb.fixture_f1()
+    f1 = tb.source(a, b, per)
+
+    ev = (f"forcing period {p:.0f} samples at {rate:.0f} Hz\n"
+          f"lead of zero periods: {zero['lead_s']:+.4f} s\n"
+          f"lead of one period:   {onep['lead_s']:+.4f} s   <- indistinguishable\n"
+          f"constructed LAG of 4 samples: raw search returns "
+          f"{lag4['raw_lead_samples']:+.0f}, wrapped to "
+          f"{lag4['lead_samples']:+.0f}\n"
+          "  the raw branch is chosen by where the search lands, and the SIGN\n"
+          "  of the lead is what the amplitude/phase agreement check reads --\n"
+          "  so the branch was deciding a verdict. Leads are now reported in\n"
+          "  the principal branch (-P/2, +P/2].\n"
+          f"near half a period: sign_determined={half['sign_determined']} "
+          "-- the sign is withheld, not reported\n"
+          f"fixture F1 (A oscillates, B quiet): {f1['kind']}, "
+          f"phase {f1['phase']['kind']}\n"
+          "  a phase lead against a channel that does not move is a property\n"
+          "  of its residual variation, so F1 as specified cannot be read and\n"
+          "  the amplitude ratio carries the verdict alone.")
+    ok = (abs(zero["lead_s"] - onep["lead_s"]) < 1e-9
+          and round(lag4["raw_lead_samples"]) == 36
+          and round(lag4["lead_samples"]) == -4
+          and half["sign_determined"] is False
+          and f1["phase"]["kind"] == "NOT_EVALUABLE")
+    record("NC_013", "HOLDS" if ok else "FALSIFIED",
+           "A phase lead is fixed only modulo the forcing period, and is not "
+           "measurable at all against a channel that does not move.", ev)
+
+
+CHECKS = CHECKS + [nc002_denominator_sets_the_verdict,
+                   nc006_assigned_path_is_the_sharper_bound,
+                   nc009_residual_is_never_fitted,
+                   nc013_lead_is_modulo_the_forcing_period]
+
+
 def main():
     print("=" * 74)
     print("CLAIM CHECK -- Noise-as-Information-Sensor")

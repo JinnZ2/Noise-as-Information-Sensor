@@ -137,6 +137,7 @@ software/                the four domain processors + Arduino firmware
 dashboard/               aggregator
 symbolic/                resonance engine, phantom detector, phantom word map
 experiments/             executable claim checks
+tools/                   four instruments added under DISPATCH NOISE-1
 docs/Field_Manual.md     conceptual framing
 docs/FALSIFICATION_LOG.md  what was claimed, what was run, what died
 hardware/                component specs by sensor layer
