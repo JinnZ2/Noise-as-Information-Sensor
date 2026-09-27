@@ -26,4 +26,7 @@ n3.sign_floor                0.0    PLACEHOLDER  |residual| at or below this is 
 n4.amplitude_ratio_hi        3.0    PLACEHOLDER  A/B at or above this reads as a mode of body A
 n4.amplitude_ratio_lo        0.3333 PLACEHOLDER  A/B at or below this reads as sourced on body B
 n4.clock_tolerance_frac      0.01   PLACEHOLDER  permitted fractional mismatch between declared sample rates
-n4.phase_variance_floor      1e-06  PLACEHOLDER  a channel with rms at or below this carries no phase; the lead against it is not a measurement
+n4.phase_variance_floor      1e-06  PLACEHOLDER  a channel with rms at or below this carries no phase and no onset; a lead against it is not a measurement
+n4.envelope_window_frac      1.0    PLACEHOLDER  moving-RMS window as a fraction of the forcing period; below 1.0 the onset index moves with the carrier phase at onset
+n4.onset_frac                0.5    PLACEHOLDER  onset = first exceedance of this fraction of the body's OWN peak envelope
+n4.onset_search_periods      1.0    PLACEHOLDER  envelope cross-correlation lag is searched within this many forcing periods
