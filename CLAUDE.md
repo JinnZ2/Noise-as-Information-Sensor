@@ -214,3 +214,17 @@ search for unknowns → rerun`. Practically, for an AI assistant working here:
 | Biological | ms - min | `biological_processor.py` | VOC, CO2/CH4, soil sensors |
 | Electromagnetic | ms - hr | `em_processor.py` | Magnetometer, Geiger counter |
 | Planetary | hr - years | `gaia_processor.py` | Barometric, GPS, seismic |
+
+<!-- clone-refspec-note v1 -->
+## Cloning and pushing
+Shallow clones are single-branch by default.
+Before pushing any branch other than main, run:
+
+    git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+    git fetch --depth 1
+
+Or clone with: git clone --depth 1 --no-single-branch <url>
+Without this, the first push of a new branch
+fails the tracking-ref check even when the
+commit landed.
+<!-- /clone-refspec-note v1 -->
