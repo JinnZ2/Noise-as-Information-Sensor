@@ -1,3 +1,6 @@
+> Before reading or editing anything here, read READ_ME_THIS_WAY.md.
+> Mismatches, dead ends and odd names in this repo are kept on purpose.
+
 # Noise-as-Information Sensor
 
 A multi-scale sensor framework that treats environmental **noise as a source of
