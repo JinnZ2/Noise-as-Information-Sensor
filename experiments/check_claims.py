@@ -409,8 +409,9 @@ CHECKS = [c1_documented_paths, c2_quantum_timescales, c3_synthetic_injection,
 # has not been run is not a finding. Every C-row above is untouched.
 #
 # Ids are shared with tools/CLAIM_TABLE.md so one claim carries one id in both
-# files. The table holds NC_001..NC_021; the four below are the ones that are
-# executable here, and the table says which of the rest are not and why.
+# files. The five below are the ones executable here; the table holds the
+# rest under a TABLE STATUS and says why each is not a harness row. The
+# table's id count is READ at summary time, not stored here (NC_025).
 #
 # These checks import from tools/ only. They do not read, call or depend on
 # any processor, the dashboard or the symbolic engine, so an NC row cannot
@@ -517,7 +518,8 @@ def nc009_residual_is_never_fitted():
 
 def nc013_lead_is_modulo_the_forcing_period():
     """tools/two_body_source.py: a periodic correlation fixes the lead only
-    within a period, and the branch was deciding a verdict."""
+    within a period. Since 2026-09-27 phase_lead() is DIAGNOSTIC and decides
+    nothing; the property is still a property of the operation."""
     import two_body_source as tb
 
     n, p, rate = 240, 40.0, 100.0
@@ -529,6 +531,7 @@ def nc013_lead_is_modulo_the_forcing_period():
 
     a, b, per = tb.fixture_f1()
     f1 = tb.source(a, b, per)
+    f1_phase = tb.phase_lead(a["series"], b["series"], a["sample_rate_hz"], per)
 
     ev = (f"forcing period {p:.0f} samples at {rate:.0f} Hz\n"
           f"lead of zero periods: {zero['lead_s']:+.4f} s\n"
@@ -536,31 +539,92 @@ def nc013_lead_is_modulo_the_forcing_period():
           f"constructed LAG of 4 samples: raw search returns "
           f"{lag4['raw_lead_samples']:+.0f}, wrapped to "
           f"{lag4['lead_samples']:+.0f}\n"
-          "  the raw branch is chosen by where the search lands, and the SIGN\n"
-          "  of the lead is what the amplitude/phase agreement check reads --\n"
-          "  so the branch was deciding a verdict. Leads are now reported in\n"
-          "  the principal branch (-P/2, +P/2].\n"
+          "  the raw branch is chosen by where the search lands. When this row\n"
+          "  was first run the SIGN of that lead was what the agreement check\n"
+          "  read, so the branch was deciding a verdict. Leads are reported in\n"
+          "  the principal branch (-P/2, +P/2] and, from 2026-09-27, the phase\n"
+          "  is read by NO verdict: source() decides on amplitude checked\n"
+          "  against ONSET timing (NC_022) and its return carries no phase.\n"
           f"near half a period: sign_determined={half['sign_determined']} "
           "-- the sign is withheld, not reported\n"
-          f"fixture F1 (A oscillates, B quiet): {f1['kind']}, "
-          f"phase {f1['phase']['kind']}\n"
+          f"fixture F1 (A bursts, B quiet): {f1['kind']}, decided by "
+          f"{f1['decided_by']}; phase diagnostic on the same traces: "
+          f"{f1_phase['kind']}\n"
           "  a phase lead against a channel that does not move is a property\n"
-          "  of its residual variation, so F1 as specified cannot be read and\n"
-          "  the amplitude ratio carries the verdict alone.")
+          "  of its residual variation (NC_012).")
     ok = (abs(zero["lead_s"] - onep["lead_s"]) < 1e-9
           and round(lag4["raw_lead_samples"]) == 36
           and round(lag4["lead_samples"]) == -4
           and half["sign_determined"] is False
-          and f1["phase"]["kind"] == "NOT_EVALUABLE")
+          and f1_phase["kind"] == "NOT_EVALUABLE"
+          and "phase" not in f1)
     record("NC_013", "HOLDS" if ok else "FALSIFIED",
            "A phase lead is fixed only modulo the forcing period, and is not "
            "measurable at all against a channel that does not move.", ev)
 
 
+def nc022_onset_reads_the_lead_phase_cannot():
+    """tools/two_body_source.py F4: A leads by exactly one forcing period.
+    Onset timing classifies; the phase diagnostic on the same traces reads a
+    lead of zero."""
+    import two_body_source as tb
+
+    a, b, per = tb.fixture_f4()
+    r4 = tb.source(a, b, per)
+    ph = tb.phase_lead(a["series"], b["series"], a["sample_rate_hz"], per)
+    rate = a["sample_rate_hz"]
+    lead_s = r4.get("onset_lead_s")
+    onset_samples = (lead_s or 0.0) * rate
+    lead_txt = "none" if lead_s is None else f"{onset_samples:+.1f} samples ({lead_s:+.3f} s)"
+    ph_txt = (f"{ph['lead_samples']:+.1f} samples in the principal branch"
+              if ph["kind"] == "VALUE" else f"{ph['kind']}: {ph.get('reason', '')}")
+    ev = (f"F4: body A bursts at sample 100, body B at sample 140, one forcing\n"
+          f"period ({per * rate:.0f} samples) later. Amplitude ratio "
+          f"{r4.get('amplitude_ratio')}.\n"
+          f"verdict: {r4['kind']}   decided by: {r4.get('decided_by')}\n"
+          f"onset lead of A over B: {lead_txt}, onset agrees: {r4.get('onset_agrees')}\n"
+          f"phase DIAGNOSTIC on the same traces: {ph_txt}\n"
+          "  one period and zero are the same peak to a periodic correlation,\n"
+          "  so phase reads A as not leading. Onset reads the period. The\n"
+          "  worked instance predicts a lead of about one period, which is\n"
+          "  exactly the value a phase reading cannot resolve.")
+    ok = (r4["kind"] == "SOURCE_A_MODE"
+          and r4.get("onset_agrees") is True
+          and lead_s is not None
+          and abs(onset_samples - per * rate) <= 2
+          and ph["kind"] == "VALUE"
+          and abs(ph["lead_samples"]) <= 2)
+    record("NC_022", "HOLDS" if ok else "FALSIFIED",
+           "With A leading by exactly one forcing period, onset timing "
+           "classifies the source and the phase diagnostic reads zero.", ev)
+
+
 CHECKS = CHECKS + [nc002_denominator_sets_the_verdict,
                    nc006_assigned_path_is_the_sharper_bound,
                    nc009_residual_is_never_fitted,
-                   nc013_lead_is_modulo_the_forcing_period]
+                   nc013_lead_is_modulo_the_forcing_period,
+                   nc022_onset_reads_the_lead_phase_cannot]
+
+
+def _nc_ids_in_table():
+    """Every NC_* id declared in tools/CLAIM_TABLE.md, or None if unreadable.
+    The denominator for the NC tally below is read from the table, not typed
+    here, so the two cannot drift apart silently."""
+    import re
+    path = os.path.join(ROOT, "tools", "CLAIM_TABLE.md")
+    try:
+        with open(path) as fh:
+            text = fh.read()
+    except OSError:
+        return None
+    return sorted(set(re.findall(r"^\| (NC_\d{3}) \|", text, re.M)))
+
+
+def _tally(rows):
+    out = {}
+    for _, verdict, _, _ in rows:
+        out[verdict] = out.get(verdict, 0) + 1
+    return "  ".join(f"{k}={v}" for k, v in sorted(out.items()))
 
 
 def main():
@@ -574,12 +638,32 @@ def main():
     print("SUMMARY")
     print("=" * 74)
     for cid, verdict, claim, _ in RESULTS:
-        print(f"  {cid:4s} {verdict:10s} {claim[:52]}")
-    tally = {}
-    for _, verdict, _, _ in RESULTS:
-        tally[verdict] = tally.get(verdict, 0) + 1
-    print("\n  " + "  ".join(f"{k}={v}" for k, v in sorted(tally.items())))
-    print("\n  Write-up: docs/FALSIFICATION_LOG.md")
+        print(f"  {cid:6s} {verdict:10s} {claim[:52]}")
+
+    # Two series, two tallies, two denominators. A single line would read as
+    # movement when a row is added to one series and none moved in the other.
+    c_rows = [r for r in RESULTS if r[0].startswith("C")]
+    nc_rows = [r for r in RESULTS if r[0].startswith("NC_")]
+    table_ids = _nc_ids_in_table()
+    print(f"\n  C  rows  {_tally(c_rows)}"
+          f"   ({len(c_rows)} of {len(c_rows)} C ids carry a harness verdict)")
+    if table_ids is None:
+        nc_denominator = "tools/CLAIM_TABLE.md unreadable; denominator unstated"
+    else:
+        harness_ids = {r[0] for r in nc_rows}
+        table_only = [i for i in table_ids if i not in harness_ids]
+        not_in_table = sorted(harness_ids - set(table_ids))
+        nc_denominator = (f"{len(nc_rows)} of {len(table_ids)} NC ids in "
+                          f"tools/CLAIM_TABLE.md carry a harness verdict; the "
+                          f"other {len(table_only)} carry a TABLE status "
+                          f"(SUPPORTED / UNVERIFIED / CORRECTED / CLOSED), "
+                          f"which is not a verdict here")
+        if not_in_table:
+            nc_denominator += f"; harness ids missing from the table: {not_in_table}"
+    print(f"  NC rows  {_tally(nc_rows)}   ({nc_denominator})")
+    print(f"  all      {_tally(RESULTS)}   (both series; read the two lines "
+          f"above, not this one)")
+    print("\n  Write-up: docs/FALSIFICATION_LOG.md (C rows); tools/CLAIM_TABLE.md (NC rows)")
     return 0
 
 

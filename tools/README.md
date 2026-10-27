@@ -12,9 +12,16 @@ They do not read, call, modify or endorse anything in `software/`,
 under `NC_*` ids, kept apart from the repository's own `C1..C12` in
 `docs/FALSIFICATION_LOG.md`.
 
-Four of those ids -- NC_002, NC_006, NC_009, NC_013 -- are also rows in
-`experiments/check_claims.py`, added under the repository's contributing rule.
-They import from `tools/` only, so an NC row cannot move because a C row moved.
+Five of those ids -- NC_002, NC_006, NC_009, NC_013, NC_022 -- are also rows
+in `experiments/check_claims.py`, added under the repository's contributing
+rule. They import from `tools/` only, so an NC row cannot move because a C row
+moved. The harness tallies the C series and the NC series on separate lines
+with both denominators stated (`NC_025`).
+
+**STATE 2026-09-27: the N4 onset rewrite is WRITTEN, NOT RUN** (`NC_024`).
+Command execution was refused for the rest of the session that wrote it. The
+first `python3 tools/test_tools.py` and `python3 experiments/check_claims.py`
+are the acceptance test.
 
 ```
 python3 tools/test_tools.py          # every selftest, check total printed
@@ -116,26 +123,53 @@ error — is text only and marked NOT RUN.
 Two coupled bodies, one sensor site. Is the signal a property of the body at
 risk, or of the body the sensor sits on? Returns `SOURCE_A_MODE`, `SOURCE_B`,
 `TRAILER_CHANNEL_ABSENT` or `NOT_EVALUABLE`, with the amplitude ratio, the
-phase lead, and whether the two agree.
+ONSET timing of each body, and whether the two agree.
 
-Two refusals, both found while building the fixtures rather than while writing
-the spec:
+**Onset, not phase.** The first build separated the bodies on a phase lead
+from a cross-correlation of the raw traces. `NC_013` showed that fixes the lead
+only modulo the forcing period, and the worked instance predicts a lead of
+about one period — the value a phase reading cannot resolve. On the operator's
+instruction (2026-09-24) the decision path reads onset timing instead:
 
-- **A phase lead against a quiet channel is not a measurement** (`NC_012`). F1
-  as specified asks for a lead against a body that does not move; the tool
-  refuses the phase and decides on amplitude alone, saying so. `F1b` is the
-  case F1 was reaching for and ships beside it.
-- **A lead is determined only modulo the forcing period** (`NC_013`). A
-  constructed lag of 4 samples in a 40-sample period came back from the raw
-  search as a lead of 36. Leads are wrapped into the principal branch and the
-  sign is withheld near half a period.
+```
+per body    first exceedance of n4.onset_frac of the body's OWN peak
+            amplitude envelope (moving RMS over n4.envelope_window_frac
+            of a forcing period)
+between     lag at max cross-correlation of the two ENVELOPES, searched
+            within n4.onset_search_periods of the event
+states      MEASURED / NO_EVENT (nothing moved) / NO_RISE (already moving
+            at the first sample; the onset is outside the record)
+```
+
+`phase_lead()` is kept as a DIAGNOSTIC. `source()` does not call it and no
+return carries a phase field, both asserted in the selftest. Fixtures:
+
+```
+F1   A bursts, B quiet          SOURCE_A_MODE; B is NO_EVENT, A first by default
+F1b  A first by 8 samples       SOURCE_A_MODE; onset and phase agree inside a period
+F2   B dominant and first       SOURCE_B
+F3   B missing                  TRAILER_CHANNEL_ABSENT (an absence, never inferred)
+F4   A first by EXACTLY ONE     SOURCE_A_MODE by onset; the phase diagnostic on
+     forcing period             the same traces reads ZERO           (NC_022)
+     + contrasts: opposite readings -> NOT_EVALUABLE; a steady oscillation ->
+       NO_RISE on both, amplitude alone, stated; clock skew; comparable bodies
+```
+
+Two refusals found while building the first fixtures still stand: a phase lead
+against a quiet channel is not a measurement (`NC_012`), and a lead is
+determined only modulo the forcing period (`NC_013`). One finding from the
+rewrite: the envelope window must cover a full carrier period or the onset
+index moves with the carrier phase at onset (`NC_023`, derived and untested;
+the ESP-1 side carries 0.25 and never exercises the case).
 
 The worked instance — a tractor cab and its trailer on a serpentine descent,
-sensor in the cab, body at risk the trailer — is text. Its cross-link, the
-cross-link is `JinnZ2/Simulators, stability-trigger-envelope/ (ESP-1)`, marked
-**PENDING, not yet landed**: checked 2026-09-24 against that repository as
-available to this session, 213 folders and no `stability-trigger-envelope`
-among them. Nothing was reconstructed in its place.
+sensor in the cab, body at risk the trailer — is text. Its cross-link
+`JinnZ2/Simulators, stability-trigger-envelope/ (ESP-1)` was filed
+**PENDING** on 2026-09-24 (213 folders there, none of them it) and **LANDED**
+on 2026-09-27 at commit `038a30f` of that repository's
+`claude/noise-information-four-tools-5u0l4k` branch (`NC_017`). Its
+`classify()` reads onset for the same reason this file does; neither imports
+the other, and both are one author's.
 
 ---
 
@@ -168,18 +202,31 @@ numpy was then installed and it runs (`NC_020`, corrected in place rather than
 replaced). A baseline was captured **before** any NC row was added, so the
 no-movement result below is a measurement.
 
-**Added under the contributing rule:** four `NC_*` rows in
-`experiments/check_claims.py`, one per tool. The first filing withheld them on
-an overbroad reading of the dispatch's STEP 0; the operator clarified that
-adding new rows is not editing or endorsing an older claim (`NC_019`). The
-insertion is pure -- 162 insertions, 0 deletions -- and every `C1..C12`
-verdict is byte-identical before and after:
+**Added under the contributing rule:** five `NC_*` rows in
+`experiments/check_claims.py` -- one per tool, and a second for N4 (`NC_022`,
+F4). The first filing withheld them on an overbroad reading of the dispatch's
+STEP 0; the operator clarified that adding new rows is not editing or
+endorsing an older claim (`NC_019`). The first insertion was pure -- 162
+insertions, 0 deletions -- and every `C1..C12` verdict was byte-identical
+before and after.
+
+**The summary line was corrected on 2026-09-27** (`NC_025`). The first filing
+reported it as one line, `FALSIFIED=9 HOLDS=1 -> HOLDS=5`, which reads as
+movement in a tally where nothing moved: twelve C rows and four NC rows were
+summed together, while the NC series ran to NC_021 with only four ids carrying
+a harness verdict. The harness now prints two series, two denominators:
 
 ```
-before   FALSIFIED=9  HOLDS=1  OPEN=1  REVISED=1
-after    FALSIFIED=9  HOLDS=5  OPEN=1  REVISED=1     <- the four added HOLDS
-C rows   identical, line for line
+C  rows  FALSIFIED=9  HOLDS=1  OPEN=1  REVISED=1   (12 of 12 C ids carry a harness verdict)
+NC rows  HOLDS=5                                   (5 of 25 NC ids in tools/CLAIM_TABLE.md carry
+                                                    a harness verdict; the other 20 carry a
+                                                    TABLE status, which is not a verdict here)
 ```
+
+The NC denominator is read from `CLAIM_TABLE.md` at run time, not typed into
+the harness. The two lines above are what the code is written to print and
+have NOT been observed (`NC_024`); the C line is the measured 2026-09-24
+baseline and is not expected to move.
 
 Nothing in `tools/` imports numpy; the four instruments still run where it is
 absent.
