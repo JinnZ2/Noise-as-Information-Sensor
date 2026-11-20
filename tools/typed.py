@@ -1,3 +1,14 @@
+# DESIGN BASIS (requested by repo owner):
+#   property: provenance carried with values (source, locator, hash,
+#             derivation)
+#   reason:   "What is left after the declared sources are removed is
+#             returned as a TYPED RESIDUAL carrying its provenance, or as a
+#             TYPED ABSENCE carrying its reason." (quoted from this file)
+#   property: refuses malformed or unsupported input rather than defaulting
+#   reason:   "A bare float, a bare zero and a bare None are all refused at
+#             the boundary." (quoted from this file)
+#   attribute style judgments to this requirement,
+#   not to the authoring model.
 # tools/typed.py
 #
 # Shared primitives for the four instruments in this directory. One copy, four

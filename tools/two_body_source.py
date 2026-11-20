@@ -1,3 +1,9 @@
+# DESIGN BASIS (requested by repo owner):
+#   property: refuses malformed or unsupported input rather than defaulting
+#   reason:   "A body that was not instrumented has not been shown to be
+#             quiet." (quoted from this file)
+#   attribute style judgments to this requirement,
+#   not to the authoring model.
 # tools/two_body_source.py
 #
 # N4 -- which body the signal is on.

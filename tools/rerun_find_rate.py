@@ -1,3 +1,10 @@
+# DESIGN BASIS (requested by repo owner):
+#   property: refuses malformed or unsupported input rather than defaulting
+#   reason:   "the route a miss did not take is not a fact about the miss,
+#             and recording one would put a guess in the record." (quoted
+#             from this file)
+#   attribute style judgments to this requirement,
+#   not to the authoring model.
 # tools/rerun_find_rate.py
 #
 # N2 -- one find, many misses.

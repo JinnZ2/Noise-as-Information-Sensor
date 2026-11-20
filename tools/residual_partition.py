@@ -1,3 +1,11 @@
+# DESIGN BASIS (requested by repo owner):
+#   property: refuses malformed or unsupported input rather than defaulting
+#   reason:   "Fitting a candidate's magnitude to the residual makes any
+#             candidate consistent, which is the move that turns an
+#             unexplained remainder into a confirmed mechanism without a
+#             measurement." (quoted from this file)
+#   attribute style judgments to this requirement,
+#   not to the authoring model.
 # tools/residual_partition.py
 #
 # N3 -- the residual is not noise.

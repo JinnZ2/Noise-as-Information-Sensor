@@ -1,3 +1,14 @@
+# DESIGN BASIS (requested by repo owner):
+#   property: explicit status states for absent / unknown / not-run values
+#   reason:   "Keep **found**, **out of scope** and **unresolved** apart.
+#             They are different outcomes." (quoted from
+#             READ_ME_THIS_WAY.md section 4)
+#   property: refuses malformed or unsupported input rather than defaulting
+#   reason:   "the tool refuses to compare two channels read by different
+#             readers rather than reporting a loss that is partly a reader
+#             difference." (quoted from this file)
+#   attribute style judgments to this requirement,
+#   not to the authoring model.
 # tools/channel_loss.py
 #
 # N1 -- what the reading channel removed.
